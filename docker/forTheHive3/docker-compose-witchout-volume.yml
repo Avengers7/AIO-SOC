@@ -1,0 +1,31 @@
+version: "2"
+services:
+  elasticsearch-for-thehive3:
+    image: elasticsearch:7.9.1
+    container_name: elasticsearch-for-thehive3
+    environment:
+      - http.host=0.0.0.0
+      - discovery.type=single-node
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./elasticsearch_data:/usr/share/elasticsearch/data
+      - ./elasticsearch_logs:/usr/share/elasticsearch/logs
+  cortex-for-thehive3:
+    image: thehiveproject/cortex:3.1.0-1
+    container_name: cortex-for-thehive3
+    depends_on:
+      - elasticsearch-for-thehive3
+    ports:
+      - "0.0.0.0:9901:9001"
+  thehive3:
+    image: thehiveproject/thehive:3.5.0-1
+    container_name: thehive3
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch-for-thehive3
+      - cortex-for-thehive3
+    ports:
+      - "0.0.0.0:9900:9000"
